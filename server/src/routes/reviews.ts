@@ -8,7 +8,7 @@ const router = Router();
 router.get("/food/:foodItemId", async (req, res) => {
   try {
     const reviews = await prisma.review.findMany({
-      where: { foodItemId: req.params.foodItemId, isApproved: true },
+      where: { foodItemId: String(req.params.foodItemId), isApproved: true },
       orderBy: { createdAt: "desc" },
       take: 50,
     });
@@ -83,7 +83,7 @@ router.post("/", authenticate, async (req, res) => {
 // Admin: get all reviews
 router.get("/admin", authenticate, requireAdmin, async (req, res) => {
   try {
-    const { approved } = req.query;
+    const { approved } = req.query as { approved?: string };
     const where: any = {};
     if (approved === "true") where.isApproved = true;
     if (approved === "false") where.isApproved = false;
@@ -106,7 +106,7 @@ router.get("/admin", authenticate, requireAdmin, async (req, res) => {
 router.patch("/admin/:id/approve", authenticate, requireAdmin, async (req, res) => {
   try {
     const review = await prisma.review.update({
-      where: { id: req.params.id },
+      where: { id: String(req.params.id) },
       data: { isApproved: true },
     });
     res.json(review);
@@ -119,7 +119,7 @@ router.patch("/admin/:id/approve", authenticate, requireAdmin, async (req, res) 
 router.patch("/admin/:id/hide", authenticate, requireAdmin, async (req, res) => {
   try {
     const review = await prisma.review.update({
-      where: { id: req.params.id },
+      where: { id: String(req.params.id) },
       data: { isApproved: false },
     });
     res.json(review);
@@ -131,7 +131,7 @@ router.patch("/admin/:id/hide", authenticate, requireAdmin, async (req, res) => 
 // Admin: delete review
 router.delete("/admin/:id", authenticate, requireAdmin, async (req, res) => {
   try {
-    await prisma.review.delete({ where: { id: req.params.id } });
+    await prisma.review.delete({ where: { id: String(req.params.id) } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete review" });

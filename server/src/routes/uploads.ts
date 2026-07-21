@@ -71,7 +71,7 @@ router.post("/", authenticate, requireAdmin, upload.single("image"), async (req,
 
 router.delete("/:filename", authenticate, requireAdmin, async (req, res) => {
   try {
-    const filename = req.params.filename;
+    const filename = String(req.params.filename);
     const fullPath = path.resolve(path.join(uploadDir, filename));
 
     // Prevent path traversal

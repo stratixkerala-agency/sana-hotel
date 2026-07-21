@@ -121,7 +121,8 @@ router.post("/", optionalAuth, async (req, res) => {
 // Client: get order by phone number (shows all orders for that phone)
 router.get("/track", async (req, res) => {
   try {
-    const { phone, orderNumber } = req.query;
+    const phone = String(req.query.phone || "");
+    const orderNumber = req.query.orderNumber ? String(req.query.orderNumber) : undefined;
     if (!phone) {
       return res.status(400).json({ error: "Phone number is required" });
     }
@@ -159,7 +160,9 @@ router.get("/track", async (req, res) => {
 // Admin: get all orders
 router.get("/admin", authenticate, requireAdmin, async (req, res) => {
   try {
-    const { status, limit = "50", offset = "0" } = req.query;
+    const status = String(req.query.status || "");
+    const limit = String(req.query.limit || "50");
+    const offset = String(req.query.offset || "0");
 
     const where: any = {};
     if (status) where.status = status;
@@ -171,8 +174,8 @@ router.get("/admin", authenticate, requireAdmin, async (req, res) => {
           items: { include: { foodItem: { select: { id: true, name: true, image: true } } } },
         },
         orderBy: { createdAt: "desc" },
-        take: parseInt(String(limit)),
-        skip: parseInt(String(offset)),
+        take: parseInt(limit),
+        skip: parseInt(offset),
       }),
       prisma.order.count({ where }),
     ]);
@@ -186,8 +189,9 @@ router.get("/admin", authenticate, requireAdmin, async (req, res) => {
 // Admin: get single order
 router.get("/admin/:id", authenticate, requireAdmin, async (req, res) => {
   try {
+    const id = String(req.params.id);
     const order = await prisma.order.findUnique({
-      where: { id: req.params.id },
+      where: { id },
       include: {
         items: { include: { foodItem: { select: { id: true, name: true, image: true } } } },
       },
@@ -204,6 +208,7 @@ router.get("/admin/:id", authenticate, requireAdmin, async (req, res) => {
 // Admin: update order status
 router.patch("/admin/:id/status", authenticate, requireAdmin, async (req, res) => {
   try {
+    const id = String(req.params.id);
     const { status } = req.body;
     const validStatuses = ["PENDING", "ACCEPTED", "PREPARING", "READY", "DELIVERED", "CANCELLED"];
 
@@ -214,7 +219,7 @@ router.patch("/admin/:id/status", authenticate, requireAdmin, async (req, res) =
     // If cancelling, restore stock
     if (status === "CANCELLED") {
       const order = await prisma.order.findUnique({
-        where: { id: req.params.id },
+        where: { id },
         include: { items: true },
       });
 
@@ -230,25 +235,25 @@ router.patch("/admin/:id/status", authenticate, requireAdmin, async (req, res) =
             });
           }
           await tx.order.update({
-            where: { id: req.params.id },
+            where: { id },
             data: { status },
           });
         });
       }
     } else {
       await prisma.order.update({
-        where: { id: req.params.id },
+        where: { id },
         data: { status },
       });
     }
 
     const order = await prisma.order.findUnique({
-      where: { id: req.params.id },
+      where: { id },
       include: { items: true },
     });
 
     // Broadcast status update
-    broadcast("order_status", { orderId: req.params.id, status });
+    broadcast("order_status", { orderId: id, status });
 
     res.json(order);
   } catch (err) {

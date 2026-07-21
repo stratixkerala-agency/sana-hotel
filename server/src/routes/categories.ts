@@ -67,7 +67,7 @@ router.patch("/:id", authenticate, requireAdmin, async (req, res) => {
     if (sortOrder !== undefined) data.sortOrder = sortOrder;
     if (isActive !== undefined) data.isActive = isActive;
 
-    const category = await prisma.category.update({ where: { id: req.params.id }, data });
+    const category = await prisma.category.update({ where: { id: String(req.params.id) }, data });
     res.json(category);
   } catch (err) {
     console.error("Update category error:", err);
@@ -78,7 +78,7 @@ router.patch("/:id", authenticate, requireAdmin, async (req, res) => {
 // Admin: delete category
 router.delete("/:id", authenticate, requireAdmin, async (req, res) => {
   try {
-    await prisma.category.delete({ where: { id: req.params.id } });
+    await prisma.category.delete({ where: { id: String(req.params.id) } });
     res.json({ success: true });
   } catch (err) {
     console.error("Delete category error:", err);

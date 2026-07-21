@@ -7,7 +7,11 @@ const router = Router();
 // Public: get all available food items
 router.get("/", async (req, res) => {
   try {
-    const { category, search, featured, limit = "50", offset = "0" } = req.query;
+    const category = String(req.query.category || "");
+    const search = String(req.query.search || "");
+    const featured = String(req.query.featured || "");
+    const limit = String(req.query.limit || "50");
+    const offset = String(req.query.offset || "0");
 
     const where: any = { isAvailable: true };
     if (category) where.category = { slug: category };
@@ -49,7 +53,10 @@ router.get("/", async (req, res) => {
 // Admin: get all food items (including unavailable)
 router.get("/admin/all", authenticate, requireAdmin, async (req, res) => {
   try {
-    const { category, search, limit = "100", offset = "0" } = req.query;
+    const category = String(req.query.category || "");
+    const search = String(req.query.search || "");
+    const limit = String(req.query.limit || "100");
+    const offset = String(req.query.offset || "0");
 
     const where: any = {};
     if (category) where.category = { slug: category };
@@ -84,7 +91,7 @@ router.get("/admin/all", authenticate, requireAdmin, async (req, res) => {
 router.get("/:slug", async (req, res) => {
   try {
     const item = await prisma.foodItem.findUnique({
-      where: { slug: req.params.slug },
+      where: { slug: String(req.params.slug) },
       include: {
         category: { select: { id: true, name: true, slug: true } },
         reviews: {
@@ -167,7 +174,7 @@ router.patch("/:id", authenticate, requireAdmin, async (req, res) => {
     if (isFeatured !== undefined) data.isFeatured = isFeatured;
 
     const item = await prisma.foodItem.update({
-      where: { id: req.params.id },
+      where: { id: String(req.params.id) },
       data,
       include: { category: { select: { id: true, name: true, slug: true } } },
     });
@@ -182,7 +189,7 @@ router.patch("/:id", authenticate, requireAdmin, async (req, res) => {
 // Admin: delete food item
 router.delete("/:id", authenticate, requireAdmin, async (req, res) => {
   try {
-    await prisma.foodItem.delete({ where: { id: req.params.id } });
+    await prisma.foodItem.delete({ where: { id: String(req.params.id) } });
     res.json({ success: true });
   } catch (err) {
     console.error("Delete food error:", err);

@@ -25,7 +25,7 @@ export function addClient(id: string, res: Response) {
   });
 }
 
-export function broadcast(event: string, data: unknown) {
+export function broadcast(event: string, data: Record<string, unknown>) {
   const payload = `data: ${JSON.stringify({ type: event, ...data })}\n\n`;
   clients.forEach((client) => {
     client.res.write(payload);
