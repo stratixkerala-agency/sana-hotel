@@ -42,8 +42,9 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-500 space-y-1">
-          <div>&copy; {new Date().getFullYear()} Finitix Solution - ATTHERATE STORE SDN. BHD. (1263351-U). All rights reserved. Cash on Delivery only.</div>
-          <div>Powered by <span className="text-gray-300 font-semibold">Stratix AI</span></div>
+          <div>Finitix Solution - ATTHERATE STORE SDN. BHD. (1263351-U). Cash on Delivery only.</div>
+          <div>&copy; {new Date().getFullYear()} <a href="https://stratixagency.site" target="_blank" rel="noreferrer" className="hover:text-primary-400 underline">Stratix</a>. All rights reserved.</div>
+          <div>Powered by <a href="https://stratixagency.site" target="_blank" rel="noreferrer" className="text-gray-300 font-semibold hover:text-primary-400">Stratix AI</a></div>
         </div>
       </div>
     </footer>
