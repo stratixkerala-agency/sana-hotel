@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Home, Search, Heart, ShoppingCart, User } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import Footer from "../../components/Footer";
 
 const tabs = [
   { to: "/", icon: Home, label: "Home" },
@@ -18,6 +19,10 @@ export default function ClientLayout() {
       <main className="max-w-lg mx-auto">
         <Outlet />
       </main>
+
+      <div className="max-w-lg mx-auto px-0 mt-6">
+        <Footer />
+      </div>
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-orange-100">
