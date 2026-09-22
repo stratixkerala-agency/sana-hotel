@@ -1,7 +1,11 @@
 const BASE_URL = "/api";
 
+function getToken(): string | null {
+  return localStorage.getItem("finitix_token") || localStorage.getItem("sana_token");
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem("sana_token");
+  const token = getToken();
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string> || {}),
   };
@@ -125,7 +129,7 @@ export const uploads = {
   image: async (file: File) => {
     const formData = new FormData();
     formData.append("image", file);
-    const token = localStorage.getItem("sana_token");
+    const token = getToken();
     const res = await fetch(`${BASE_URL}/admin/uploads`, {
       method: "POST",
       headers: token ? { Authorization: `Bearer ${token}` } : {},

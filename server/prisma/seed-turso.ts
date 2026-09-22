@@ -19,12 +19,12 @@ const client = createClient({ url: TURSO_URL, authToken: TURSO_TOKEN });
 async function seed() {
   console.log("Seeding Turso database...");
 
-  // Create admin user
-  const adminHash = await bcrypt.hash("admin123", 12);
+  // Create admin user - Finitix Solution
+  const adminHash = await bcrypt.hash("Finitix@2026-Q5F8", 12);
   const adminId = crypto.randomUUID();
   await client.execute({
     sql: `INSERT OR IGNORE INTO "User" (id, name, email, phone, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-    args: [adminId, "Sana Admin", "admin@sana.com", "+92-300-0000000", adminHash, "ADMIN"],
+    args: [adminId, "Finitix Admin", "admin@finitixsolution.com", "+601137356004", adminHash, "ADMIN"],
   });
 
   // Create demo customer
@@ -32,7 +32,7 @@ async function seed() {
   const custId = crypto.randomUUID();
   await client.execute({
     sql: `INSERT OR IGNORE INTO "User" (id, name, email, phone, passwordHash, role, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-    args: [custId, "Guest User", "guest@sana.com", "+92-300-1111111", custHash, "CUSTOMER"],
+    args: [custId, "Guest User", "guest@finitixsolution.com", "+601137356004", custHash, "CUSTOMER"],
   });
   console.log("Users created");
 

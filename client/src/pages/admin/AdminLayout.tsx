@@ -56,10 +56,11 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-6 border-b border-gray-100">
-          <Link to="/admin" className="font-display text-xl font-bold text-primary-700">
-            Sana Admin
+          <Link to="/admin" className="flex items-center gap-2 font-display text-xl font-bold text-primary-700">
+            <img src="/logo.svg" alt="Finitix" className="h-8 w-auto" />
+            Finitix Admin
           </Link>
-          <div className="text-xs text-gray-400 mt-1">Hotel Management</div>
+          <div className="text-xs text-gray-400 mt-1">Finitix Solution Management</div>
         </div>
         <nav className="p-4 space-y-1">
           {nav.map((item) => (

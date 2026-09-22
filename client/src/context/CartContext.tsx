@@ -13,11 +13,12 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | null>(null);
 
-const STORAGE_KEY = "sana_cart";
+const STORAGE_KEY = "finitix_cart";
+const LEGACY_STORAGE_KEY = "sana_cart";
 
 function loadCart(): CartItem[] {
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
     return data ? JSON.parse(data) : [];
   } catch {
     return [];

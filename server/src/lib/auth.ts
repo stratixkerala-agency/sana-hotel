@@ -9,7 +9,7 @@ if (!JWT_SECRET) {
   console.warn("WARNING: Using fallback JWT_SECRET. Set JWT_SECRET in .env for production.");
 }
 
-const SECRET = JWT_SECRET || "sana-hotel-secret-dev-only";
+const SECRET = JWT_SECRET || "finitix-solution-secret-dev-only";
 
 export interface TokenPayload {
   userId: string;

@@ -1,5 +1,5 @@
 {
-  "name": "sana-hotel-server",
+  "name": "finitix-solution-server",
   "version": "1.0.0",
   "scripts": {
     "dev": "node --import dotenv/config node_modules/tsx/dist/cli.mjs src/index.ts",

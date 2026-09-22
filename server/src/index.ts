@@ -112,7 +112,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 
 // Graceful shutdown
 const server = app.listen(PORT, () => {
-  console.log(`Sana Hotel API running on http://localhost:${PORT}`);
+  console.log(`Finitix Solution API running on http://localhost:${PORT}`);
 });
 
 function shutdown(signal: string) {

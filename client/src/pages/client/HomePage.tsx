@@ -32,8 +32,8 @@ export default function HomePage() {
               Discover <span className="text-primary-500">Food</span>
             </h1>
           </div>
-          <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-            <span className="text-primary-600 font-bold text-sm">SH</span>
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-orange-100 overflow-hidden">
+            <img src="/logo.svg" alt="Finitix Solution" className="w-8 h-8 object-contain" />
           </div>
         </div>
       </div>

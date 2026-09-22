@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Utensils, Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -34,11 +34,11 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary-100 text-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Utensils className="w-8 h-8" />
+          <div className="bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 px-4 py-2 shadow-sm border border-orange-100 w-fit">
+            <img src="/logo.svg" alt="Finitix Solution" className="h-12 w-auto" />
           </div>
-          <h1 className="font-display text-2xl font-bold">Sana Hotel Admin</h1>
-          <p className="text-gray-500 mt-1">Sign in to manage your hotel</p>
+          <h1 className="font-display text-2xl font-bold">Finitix Solution Admin</h1>
+          <p className="text-gray-500 mt-1">Sign in to manage your business</p>
         </div>
 
         <div className="card p-8">
@@ -50,7 +50,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="input"
-                placeholder="admin@sana.com"
+                placeholder="admin@finitixsolution.com"
                 required
               />
             </div>

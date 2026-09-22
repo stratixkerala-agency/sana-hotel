@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, Menu, X, Utensils } from "lucide-react";
+import { ShoppingCart, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -22,8 +22,9 @@ export default function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold text-primary-700">
-            <Utensils className="w-6 h-6" />
-            <span>Sana Hotel</span>
+            <img src="/logo.svg" alt="Finitix Solution" className="h-9 w-auto" />
+            <span className="hidden sm:inline">Finitix Solution</span>
+            <span className="sm:hidden">Finitix</span>
           </Link>
 
           {/* Desktop Nav */}

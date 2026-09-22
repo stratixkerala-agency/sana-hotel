@@ -6,15 +6,15 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database...");
 
-  // Create admin
-  const adminPassword = await bcrypt.hash("admin123", 12);
+  // Create admin - Finitix Solution
+  const adminPassword = await bcrypt.hash("Finitix@2026-Q5F8", 12);
   const admin = await prisma.user.upsert({
-    where: { email: "admin@sana.com" },
+    where: { email: "admin@finitixsolution.com" },
     update: {},
     create: {
-      name: "Sana Admin",
-      email: "admin@sana.com",
-      phone: "+92-300-0000000",
+      name: "Finitix Admin",
+      email: "admin@finitixsolution.com",
+      phone: "+601137356004",
       passwordHash: adminPassword,
       role: "ADMIN",
     },
@@ -24,12 +24,12 @@ async function main() {
   // Create demo customer
   const custPassword = await bcrypt.hash("customer123", 12);
   await prisma.user.upsert({
-    where: { email: "guest@sana.com" },
+    where: { email: "guest@finitixsolution.com" },
     update: {},
     create: {
       name: "Guest User",
-      email: "guest@sana.com",
-      phone: "+92-300-1111111",
+      email: "guest@finitixsolution.com",
+      phone: "+601137356004",
       passwordHash: custPassword,
       role: "CUSTOMER",
     },
@@ -282,7 +282,7 @@ async function main() {
 
   // Add some demo reviews
   const foodItemsList = await prisma.foodItem.findMany({ take: 3 });
-  const customer = await prisma.user.findUnique({ where: { email: "guest@sana.com" } });
+  const customer = await prisma.user.findUnique({ where: { email: "guest@finitixsolution.com" } });
 
   if (customer && foodItemsList.length > 0) {
     const reviews = [

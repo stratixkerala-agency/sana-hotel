@@ -18,11 +18,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("sana_token");
+    const token = localStorage.getItem("finitix_token") || localStorage.getItem("sana_token");
     if (token) {
+      // migrate old key
+      localStorage.setItem("finitix_token", token);
       auth.me()
         .then(setUser)
-        .catch(() => localStorage.removeItem("sana_token"))
+        .catch(() => localStorage.removeItem("finitix_token"))
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -31,17 +33,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const res = await auth.login(email, password);
-    localStorage.setItem("sana_token", res.token);
+    localStorage.setItem("finitix_token", res.token);
+    localStorage.removeItem("sana_token");
     setUser(res.user);
   };
 
   const register = async (data: { name: string; email: string; password: string; phone?: string }) => {
     const res = await auth.register(data);
-    localStorage.setItem("sana_token", res.token);
+    localStorage.setItem("finitix_token", res.token);
+    localStorage.removeItem("sana_token");
     setUser(res.user);
   };
 
   const logout = () => {
+    localStorage.removeItem("finitix_token");
     localStorage.removeItem("sana_token");
     setUser(null);
   };
