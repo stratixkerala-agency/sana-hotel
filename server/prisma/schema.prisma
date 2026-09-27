@@ -124,3 +124,18 @@ model Notification {
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+model CashEntry {
+  id            String   @id @default(uuid())
+  type          String   // IN | OUT
+  amount        Float
+  category      String   @default("Other")
+  paymentMethod String   @default("CASH") // CASH | BANK_TRANSFER | CARD | EWALLET
+  note          String?
+  createdBy     String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([type])
+  @@index([createdAt])
+}

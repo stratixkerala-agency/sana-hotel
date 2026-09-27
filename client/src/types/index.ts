@@ -96,3 +96,21 @@ export interface DashboardStats {
   pendingOrders: number;
   lowStockItems: number;
 }
+
+export interface CashEntry {
+  id: string;
+  type: "IN" | "OUT";
+  amount: number;
+  category: string;
+  paymentMethod: string;
+  note?: string;
+  createdAt: string;
+}
+
+export const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  CASH_ON_DELIVERY: "Cash on Delivery",
+  CASH: "Cash",
+  BANK_TRANSFER: "Bank Transfer",
+  CARD: "Card",
+  EWALLET: "E-Wallet",
+};

@@ -16,6 +16,7 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import LoginPage from "./pages/admin/LoginPage";
 import DashboardPage from "./pages/admin/DashboardPage";
 import AdminOrdersPage from "./pages/admin/AdminOrdersPage";
+import AdminFinancePage from "./pages/admin/AdminFinancePage";
 import AdminMenuPage from "./pages/admin/AdminMenuPage";
 import AdminFoodFormPage from "./pages/admin/AdminFoodFormPage";
 import AdminReviewsPage from "./pages/admin/AdminReviewsPage";
@@ -63,6 +64,7 @@ export default function App() {
       >
         <Route index element={<DashboardPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
+        <Route path="finance" element={<AdminFinancePage />} />
         <Route path="menu" element={<AdminMenuPage />} />
         <Route path="menu/new" element={<AdminFoodFormPage />} />
         <Route path="menu/:id/edit" element={<AdminFoodFormPage />} />

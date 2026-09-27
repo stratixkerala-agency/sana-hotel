@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, ShoppingCart, Utensils, Star, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Utensils, Star, Wallet, LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { subscribeToOrders } from "../../lib/api";
@@ -43,6 +43,7 @@ export default function AdminLayout() {
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { to: "/admin/orders", label: "Orders", icon: ShoppingCart, badge: newOrderCount },
     { to: "/admin/menu", label: "Menu", icon: Utensils },
+    { to: "/admin/finance", label: "Finance", icon: Wallet },
     { to: "/admin/reviews", label: "Reviews", icon: Star },
   ];
 

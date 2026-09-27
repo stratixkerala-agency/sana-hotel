@@ -5,10 +5,13 @@ import { broadcast } from "../lib/notifications";
 
 const router = Router();
 
+// Accepted payment methods for orders and cash entries
+export const PAYMENT_METHODS = ["CASH_ON_DELIVERY", "CASH", "BANK_TRANSFER", "CARD", "EWALLET"];
+
 // Client: create order
 router.post("/", optionalAuth, async (req, res) => {
   try {
-    const { customerName, customerPhone, deliveryType, roomNumber, deliveryAddress, deliveryNotes, items } = req.body;
+    const { customerName, customerPhone, deliveryType, roomNumber, deliveryAddress, deliveryNotes, items, paymentMethod } = req.body;
 
     if (!customerName || !customerPhone || !items || items.length === 0) {
       return res.status(400).json({ error: "Customer info and at least one item are required" });
@@ -53,6 +56,8 @@ router.post("/", optionalAuth, async (req, res) => {
     const deliveryFee = deliveryType === "ROOM" ? 0 : 50;
     const total = subtotal + deliveryFee;
 
+    const orderPaymentMethod = PAYMENT_METHODS.includes(paymentMethod) ? paymentMethod : "CASH_ON_DELIVERY";
+
     const orderNumber = "ORD-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
 
     // Create order and update stock in a transaction
@@ -87,7 +92,7 @@ router.post("/", optionalAuth, async (req, res) => {
           subtotal,
           deliveryFee,
           total,
-          paymentMethod: "CASH_ON_DELIVERY",
+          paymentMethod: orderPaymentMethod,
           status: "PENDING",
           items: { create: orderItems },
         },
@@ -287,6 +292,71 @@ router.get("/admin/stats/summary", authenticate, requireAdmin, async (_req, res)
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
+// Admin: daily sales series (revenue + order count per day, excludes CANCELLED)
+router.get("/admin/stats/daily", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const days = Math.min(Math.max(parseInt(String(req.query.days || "14")), 1), 90);
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    start.setDate(start.getDate() - (days - 1));
+
+    const orders = await prisma.order.findMany({
+      where: { createdAt: { gte: start }, status: { not: "CANCELLED" } },
+      select: { total: true, createdAt: true },
+    });
+
+    const buckets = new Map<string, { date: string; revenue: number; orders: number }>();
+    for (let i = 0; i < days; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      buckets.set(key, { date: key, revenue: 0, orders: 0 });
+    }
+
+    for (const o of orders) {
+      const d = new Date(o.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const b = buckets.get(key);
+      if (b) {
+        b.revenue += o.total;
+        b.orders += 1;
+      }
+    }
+
+    res.json({ days, series: Array.from(buckets.values()) });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch daily stats" });
+  }
+});
+
+// Admin: revenue grouped by payment method (excludes CANCELLED)
+router.get("/admin/stats/payments", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const days = Math.min(Math.max(parseInt(String(req.query.days || "30")), 1), 365);
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    start.setDate(start.getDate() - (days - 1));
+
+    const grouped = await prisma.order.groupBy({
+      by: ["paymentMethod"],
+      where: { createdAt: { gte: start }, status: { not: "CANCELLED" } },
+      _sum: { total: true },
+      _count: { _all: true },
+    });
+
+    const breakdown = grouped.map((g) => ({
+      method: g.paymentMethod,
+      orders: g._count._all,
+      revenue: g._sum.total || 0,
+    }));
+    const totalRevenue = breakdown.reduce((s, b) => s + b.revenue, 0);
+
+    res.json({ days, totalRevenue, breakdown });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch payment stats" });
   }
 });
 

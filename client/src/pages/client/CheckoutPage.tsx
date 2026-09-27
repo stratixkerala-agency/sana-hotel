@@ -16,6 +16,7 @@ export default function CheckoutPage() {
     roomNumber: "",
     deliveryAddress: "",
     deliveryNotes: "",
+    paymentMethod: "CASH_ON_DELIVERY",
   });
 
   if (items.length === 0) {
@@ -140,14 +141,32 @@ export default function CheckoutPage() {
             <CreditCard className="w-4 h-4 text-primary-500" />
             Payment
           </h2>
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <Check className="w-4 h-4 text-green-600" />
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-green-800">Cash on Delivery</div>
-              <div className="text-xs text-green-600">Pay when your food arrives</div>
-            </div>
+          <div className="space-y-2">
+            {[
+              { value: "CASH_ON_DELIVERY", title: "Cash on Delivery", desc: "Pay when your food arrives" },
+              { value: "BANK_TRANSFER", title: "Bank Transfer", desc: "Transfer to our account, confirm on delivery" },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setForm((p) => ({ ...p, paymentMethod: opt.value }))}
+                className={`w-full rounded-2xl p-3 flex items-center gap-3 border-2 transition-all text-left ${
+                  form.paymentMethod === opt.value
+                    ? "bg-green-50 border-green-400"
+                    : "bg-white border-orange-100"
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                  form.paymentMethod === opt.value ? "bg-green-100" : "bg-gray-100"
+                }`}>
+                  <Check className={`w-4 h-4 ${form.paymentMethod === opt.value ? "text-green-600" : "text-gray-300"}`} />
+                </div>
+                <div>
+                  <div className={`text-sm font-semibold ${form.paymentMethod === opt.value ? "text-green-800" : "text-gray-700"}`}>{opt.title}</div>
+                  <div className="text-xs text-gray-500">{opt.desc}</div>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
 
@@ -182,7 +201,7 @@ export default function CheckoutPage() {
 
         <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2 mb-4">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-          {loading ? "Placing Order..." : "Place Order (Cash on Delivery)"}
+          {loading ? "Placing Order..." : form.paymentMethod === "BANK_TRANSFER" ? "Place Order (Bank Transfer)" : "Place Order (Cash on Delivery)"}
         </button>
       </form>
     </div>

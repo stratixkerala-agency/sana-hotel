@@ -12,6 +12,7 @@ import foodRoutes from "./routes/food";
 import orderRoutes from "./routes/orders";
 import reviewRoutes from "./routes/reviews";
 import uploadRoutes from "./routes/uploads";
+import cashRoutes from "./routes/cash";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -68,6 +69,7 @@ app.use("/api/food", foodRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin/uploads", uploadRoutes);
+app.use("/api/cash", cashRoutes);
 
 // SSE endpoint for admin notifications (authenticated)
 app.get("/api/admin/notifications/stream", (req, res) => {

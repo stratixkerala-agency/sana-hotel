@@ -103,6 +103,29 @@ export const orders = {
       body: JSON.stringify({ status }),
     }),
   adminStats: () => request<any>("/orders/admin/stats/summary"),
+  adminDaily: (days?: number) => {
+    const qs = days ? `?days=${days}` : "";
+    return request<{ days: number; series: { date: string; revenue: number; orders: number }[] }>(`/orders/admin/stats/daily${qs}`);
+  },
+  adminPayments: (days?: number) => {
+    const qs = days ? `?days=${days}` : "";
+    return request<{ days: number; totalRevenue: number; breakdown: { method: string; orders: number; revenue: number }[] }>(`/orders/admin/stats/payments${qs}`);
+  },
+};
+
+// Cash ledger (admin)
+export const cash = {
+  list: (params?: { from?: string; to?: string; type?: string }) => {
+    const query = new URLSearchParams();
+    if (params?.from) query.set("from", params.from);
+    if (params?.to) query.set("to", params.to);
+    if (params?.type) query.set("type", params.type);
+    const qs = query.toString();
+    return request<{ entries: any[]; totalIn: number; totalOut: number; net: number }>(`/cash${qs ? `?${qs}` : ""}`);
+  },
+  create: (data: { type: string; amount: number; category?: string; paymentMethod?: string; note?: string }) =>
+    request<any>("/cash", { method: "POST", body: JSON.stringify(data) }),
+  remove: (id: string) => request<any>(`/cash/${id}`, { method: "DELETE" }),
 };
 
 // Reviews
