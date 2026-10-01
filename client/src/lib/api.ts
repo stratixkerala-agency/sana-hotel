@@ -97,6 +97,12 @@ export const orders = {
     return request<{ orders: any[]; total: number }>(`/orders/admin${qs ? `?${qs}` : ""}`);
   },
   adminGet: (id: string) => request<any>(`/orders/admin/${id}`),
+  adminLatest: (since?: string) => {
+    const qs = since ? `?since=${encodeURIComponent(since)}` : "";
+    return request<{ serverTime: string; orders: any[] }>(`/orders/admin/latest${qs}`);
+  },
+  adminPos: (data: { orderType: string; tableNumber?: string; customerName?: string; customerPhone?: string; items: { foodItemId: string; quantity: number }[]; paymentMethod?: string; note?: string }) =>
+    request<any>("/orders/admin/pos", { method: "POST", body: JSON.stringify(data) }),
   adminUpdateStatus: (id: string, status: string) =>
     request<any>(`/orders/admin/${id}/status`, {
       method: "PATCH",

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, DollarSign, Clock, AlertTriangle, Package } from "lucide-react";
+import { ShoppingCart, DollarSign, Clock, AlertTriangle, Package, Armchair, ShoppingBag, BellRing } from "lucide-react";
 import { orders } from "../../lib/api";
 import type { DashboardStats } from "../../types";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [occupiedTables, setOccupiedTables] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,7 +16,14 @@ export default function DashboardPage() {
       orders.adminList(),
     ]).then(([statsRes, ordersRes]) => {
       setStats(statsRes);
-      setRecentOrders(ordersRes.orders?.slice(0, 5) || []);
+      const all = ordersRes.orders || [];
+      setRecentOrders(all.slice(0, 5));
+      const tables = new Set(
+        all
+          .filter((o: any) => o.deliveryType === "DINE_IN" && o.tableNumber && !["DELIVERED", "CANCELLED"].includes(o.status))
+          .map((o: any) => String(o.tableNumber))
+      );
+      setOccupiedTables(tables.size);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
@@ -39,6 +47,44 @@ export default function DashboardPage() {
   return (
     <div>
       <h1 className="font-display text-2xl font-bold mb-6">Dashboard</h1>
+
+      {/* Counter shortcuts */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <Link to="/admin/tables" className="card p-6 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all border-2 !border-orange-200">
+          <div className="w-14 h-14 bg-orange-500 text-white rounded-2xl flex items-center justify-center shrink-0">
+            <Armchair className="w-7 h-7" />
+          </div>
+          <div>
+            <div className="font-bold text-lg">Select Tables</div>
+            <div className="text-sm text-gray-500">Dine-in billing per table</div>
+            {occupiedTables > 0 && <div className="text-xs font-semibold text-orange-600 mt-1">{occupiedTables} table(s) occupied</div>}
+          </div>
+        </Link>
+        <Link to="/admin/takeaway" className="card p-6 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all border-2 !border-blue-200">
+          <div className="w-14 h-14 bg-blue-500 text-white rounded-2xl flex items-center justify-center shrink-0">
+            <ShoppingBag className="w-7 h-7" />
+          </div>
+          <div>
+            <div className="font-bold text-lg">Select Takeaway</div>
+            <div className="text-sm text-gray-500">Counter billing for pickup</div>
+          </div>
+        </Link>
+        <Link to="/admin/orders" className="card p-6 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all border-2 !border-green-200">
+          <div className="w-14 h-14 bg-green-500 text-white rounded-2xl flex items-center justify-center shrink-0 relative">
+            <BellRing className="w-7 h-7" />
+            {(stats?.pendingOrders || 0) > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-6 h-6 flex items-center justify-center rounded-full font-bold animate-pulse">
+                {stats?.pendingOrders}
+              </span>
+            )}
+          </div>
+          <div>
+            <div className="font-bold text-lg">Online Orders</div>
+            <div className="text-sm text-gray-500">Live orders from customers</div>
+            <div className="text-xs font-semibold text-green-600 mt-1">{stats?.pendingOrders || 0} pending now</div>
+          </div>
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {cards.map((card) => (

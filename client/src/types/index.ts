@@ -51,8 +51,9 @@ export interface Order {
   customerId?: string;
   customerName: string;
   customerPhone: string;
-  deliveryType: "ROOM" | "LOCATION";
+  deliveryType: "ROOM" | "LOCATION" | "DINE_IN" | "TAKEAWAY";
   roomNumber?: string;
+  tableNumber?: string;
   deliveryAddress?: string;
   deliveryNotes?: string;
   subtotal: number;

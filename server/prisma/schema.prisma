@@ -63,8 +63,9 @@ model Order {
   customer       User?       @relation(fields: [customerId], references: [id])
   customerName   String
   customerPhone  String
-  deliveryType   String      @default("ROOM") // ROOM | LOCATION
+  deliveryType   String      @default("ROOM") // ROOM | LOCATION | DINE_IN | TAKEAWAY
   roomNumber     String?
+  tableNumber    String?
   deliveryAddress String?
   deliveryNotes  String?
   subtotal       Float

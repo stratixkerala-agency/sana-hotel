@@ -1,8 +1,17 @@
 import { useEffect, useState } from "react";
-import { RefreshCw, Search } from "lucide-react";
+import { RefreshCw, Search, Printer } from "lucide-react";
 import { orders } from "../../lib/api";
+import { printOrder } from "../../lib/printer";
 import toast from "react-hot-toast";
 import type { Order, OrderStatus } from "../../types";
+import { PAYMENT_METHOD_LABELS } from "../../types";
+
+function deliveryLabel(o: any): string {
+  if (o.deliveryType === "DINE_IN") return `Dine-In · Table ${o.tableNumber || "-"}`;
+  if (o.deliveryType === "TAKEAWAY") return "Takeaway";
+  if (o.deliveryType === "ROOM") return `Room ${o.roomNumber || "-"}`;
+  return o.deliveryAddress || "Delivery";
+}
 
 const STATUS_OPTIONS: OrderStatus[] = ["PENDING", "ACCEPTED", "PREPARING", "READY", "DELIVERED", "CANCELLED"];
 
@@ -102,7 +111,7 @@ export default function AdminOrdersPage() {
                     <div className="font-mono text-sm font-semibold">{order.orderNumber}</div>
                     <div className="text-sm text-gray-500">{order.customerName} · {order.customerPhone}</div>
                     <div className="text-xs text-gray-400">
-                      {order.deliveryType === "ROOM" ? `Room ${order.roomNumber}` : order.deliveryAddress} · {order.items?.length} items
+                      {deliveryLabel(order)} · {order.items?.length} items
                     </div>
                   </div>
                 </div>
@@ -143,12 +152,12 @@ export default function AdminOrdersPage() {
                 <div>
                   <div className="text-gray-500">Delivery</div>
                   <div className="font-medium">
-                    {selectedOrder.deliveryType === "ROOM" ? `Room ${selectedOrder.roomNumber}` : selectedOrder.deliveryAddress}
+                    {deliveryLabel(selectedOrder)}
                   </div>
                 </div>
                 <div>
                   <div className="text-gray-500">Payment</div>
-                  <div className="font-medium text-green-600">Cash on Delivery</div>
+                  <div className="font-medium text-green-600">{PAYMENT_METHOD_LABELS[selectedOrder.paymentMethod] || selectedOrder.paymentMethod}</div>
                 </div>
               </div>
 
@@ -172,6 +181,20 @@ export default function AdminOrdersPage() {
                   <span>Rs. {selectedOrder.total.toLocaleString()}</span>
                 </div>
               </div>
+
+              <button
+                onClick={async () => {
+                  try {
+                    const via = await printOrder(selectedOrder);
+                    toast.success(via === "bluetooth" ? "Sent to Bluetooth printer" : "Print dialog opened");
+                  } catch (err: any) {
+                    toast.error(err.message || "Print failed");
+                  }
+                }}
+                className="btn-secondary w-full flex items-center justify-center gap-2 text-sm"
+              >
+                <Printer className="w-4 h-4" /> Print Bill
+              </button>
 
               {/* Status Controls */}
               <div className="border-t pt-4">

@@ -191,6 +191,122 @@ router.get("/admin", authenticate, requireAdmin, async (req, res) => {
   }
 });
 
+// Admin: lightweight poll for new orders (used for popup alerts)
+router.get("/admin/latest", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const since = String(req.query.since || "");
+    const sinceDate = since ? new Date(since) : new Date(Date.now() - 60 * 1000);
+    const orders = await prisma.order.findMany({
+      where: { createdAt: { gt: sinceDate } },
+      select: {
+        id: true,
+        orderNumber: true,
+        customerName: true,
+        customerPhone: true,
+        deliveryType: true,
+        tableNumber: true,
+        total: true,
+        status: true,
+        paymentMethod: true,
+        createdAt: true,
+        _count: { select: { items: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    });
+    res.json({ serverTime: new Date().toISOString(), orders });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch latest orders" });
+  }
+});
+
+// Admin: POS order (dine-in table billing / takeaway counter billing)
+router.post("/admin/pos", authenticate, requireAdmin, async (req, res) => {
+  try {
+    const { orderType, tableNumber, customerName, customerPhone, items, paymentMethod, note } = req.body;
+
+    if (!["DINE_IN", "TAKEAWAY"].includes(orderType)) {
+      return res.status(400).json({ error: "orderType must be DINE_IN or TAKEAWAY" });
+    }
+    if (orderType === "DINE_IN" && !tableNumber) {
+      return res.status(400).json({ error: "Table number is required for dine-in" });
+    }
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "At least one item is required" });
+    }
+
+    const foodItemIds = items.map((i: any) => i.foodItemId);
+    const foodItems = await prisma.foodItem.findMany({
+      where: { id: { in: foodItemIds }, isAvailable: true },
+    });
+    if (foodItems.length !== items.length) {
+      return res.status(400).json({ error: "Some items are no longer available" });
+    }
+
+    let subtotal = 0;
+    const orderItems = items.map((item: any) => {
+      const food = foodItems.find((f) => f.id === item.foodItemId);
+      if (!food) throw new Error("Item not found");
+      const quantity = parseInt(String(item.quantity));
+      if (!Number.isFinite(quantity) || quantity <= 0) throw new Error(`Invalid quantity for ${food.name}`);
+      if (food.stockQuantity < quantity) {
+        throw new Error(`${food.name} is out of stock (requested: ${quantity}, available: ${food.stockQuantity})`);
+      }
+      const totalPrice = food.price * quantity;
+      subtotal += totalPrice;
+      return { foodItemId: food.id, foodName: food.name, unitPrice: food.price, quantity, totalPrice };
+    });
+
+    const orderPaymentMethod = PAYMENT_METHODS.includes(paymentMethod) ? paymentMethod : "CASH";
+    const orderNumber = "POS-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 5).toUpperCase();
+
+    const order = await prisma.$transaction(async (tx) => {
+      for (const item of orderItems) {
+        const updated = await tx.foodItem.update({
+          where: { id: item.foodItemId },
+          data: { stockQuantity: { decrement: item.quantity } },
+        });
+        if (updated.stockQuantity <= 0) {
+          await tx.foodItem.update({ where: { id: item.foodItemId }, data: { isAvailable: false } });
+        }
+      }
+
+      const newOrder = await tx.order.create({
+        data: {
+          orderNumber,
+          customerId: req.user?.userId || null,
+          customerName: customerName || (orderType === "DINE_IN" ? `Table ${tableNumber}` : "Walk-in"),
+          customerPhone: customerPhone || "-",
+          deliveryType: orderType,
+          roomNumber: null,
+          tableNumber: orderType === "DINE_IN" ? String(tableNumber) : null,
+          deliveryAddress: null,
+          deliveryNotes: note || null,
+          subtotal,
+          deliveryFee: 0,
+          total: subtotal,
+          paymentMethod: orderPaymentMethod,
+          status: "ACCEPTED",
+          items: { create: orderItems },
+        },
+        include: { items: true },
+      });
+
+      await tx.notification.create({
+        data: { orderId: newOrder.id, type: "POS_ORDER", message: `POS ${orderType} order ${orderNumber}` },
+      });
+
+      return newOrder;
+    });
+
+    broadcast("new_order", { order });
+    res.status(201).json(order);
+  } catch (err: any) {
+    console.error("POS order error:", err);
+    res.status(400).json({ error: err.message || "Failed to create POS order" });
+  }
+});
+
 // Admin: get single order
 router.get("/admin/:id", authenticate, requireAdmin, async (req, res) => {
   try {
